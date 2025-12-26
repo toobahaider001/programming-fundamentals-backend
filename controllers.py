@@ -16,9 +16,8 @@ load_dotenv()
 db = connect_to_database()
 submissions = db.get_collection("submissions")
 
-UPLOAD_DIR = "uploads"
+UPLOAD_DIR = "/tmp/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
 
 def submit_project(data=None, files: List[UploadFile] = None):
     try:

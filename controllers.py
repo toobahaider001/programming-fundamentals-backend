@@ -81,7 +81,6 @@ def get_submission_details(id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 def get_all_submissions():
     try:
         submissions_list = list(submissions.find({}))
@@ -132,7 +131,5 @@ def update_marks(id: str, marks: float):
             "data": submission
         }
 
-    except HTTPException:
-        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

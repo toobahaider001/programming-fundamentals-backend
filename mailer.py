@@ -1,48 +1,50 @@
-import smtplib
-from email.message import EmailMessage
-from dotenv import load_dotenv
 import os
-import socket
+import resend
+from dotenv import load_dotenv
 
 load_dotenv()
 
-GMAIL_USER = os.getenv("GMAIL_USER")
-GMAIL_PASS = os.getenv("GMAIL_PASS")
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL") 
+
+resend.api_key = RESEND_API_KEY
 
 def format_submission_email(content: dict) -> str:
     lines = []
 
-    lines.append(f"Project Title: {content['project_details']['title']}")
-    lines.append(f"Description: {content['project_details']['description']}")
-    lines.append(f"Code File: {content['project_details']['code_file_path']}")
-    lines.append(f"Marks: {content['marks']}")
-    lines.append(f"Status: {content['status']}")
-    lines.append("\nStudents:")
+    lines.append(f"<h2>Project Evaluation Result</h2>")
+    lines.append(f"<p><strong>Project Title:</strong> {content['project_details']['title']}</p>")
+    lines.append(f"<p><strong>Description:</strong> {content['project_details']['description']}</p>")
+    lines.append(
+        f"<p><strong>Code File:</strong> "
+        f"<a href='{content['project_details']['code_file_path']}'>Google Drive Link</a></p>"
+    )
+    lines.append(f"<p><strong>Marks:</strong> {content['marks']}</p>")
+    lines.append(f"<p><strong>Status:</strong> {content['status']}</p>")
+    lines.append("<h3>Students</h3><ul>")
 
     for member in content.get("members", []):
-        lines.append(f"  - {member['student_name']} ({member['student_id']})")
+        lines.append(
+            f"<li>{member['student_name']} ({member['student_id']})</li>"
+        )
+
+    lines.append("</ul>")
 
     return "\n".join(lines)
 
 
 def send_email_message(to_email: str, subject: str, content: dict):
-    message = EmailMessage()
-    message["From"] = GMAIL_USER
-    message["To"] = to_email
-    message["Subject"] = subject
-    
-    body_text = format_submission_email(content)
-    message.set_content(body_text)
-
     try:
-        with smtplib.SMTP_SSL(
-            "smtp.gmail.com",
-            465,
-            timeout=30,
-            context=None
-        ) as server:
-            server.login(GMAIL_USER, GMAIL_PASS)
-            server.send_message(message)
+        html_body = format_submission_email(content)
 
-    except (smtplib.SMTPException, socket.timeout) as e:
-        raise RuntimeError(f"Email sending failed: {e}")
+        params: resend.Emails.SendParams = {
+            "from": FROM_EMAIL,
+            "to": [to_email],
+            "subject": subject,
+            "html": html_body,
+        }
+
+        resend.Emails.send(params)
+
+    except Exception as e:
+        print("Email failed:", e)

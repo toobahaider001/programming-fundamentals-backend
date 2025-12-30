@@ -117,14 +117,13 @@ def update_marks(id: str, marks: float):
 
         submission["_id"] = str(submission["_id"])
 
-        # Email notification
-        # teacher_email = os.getenv("SIR_AMEEN_EMAIL")
-        # if teacher_email:
-        #     send_email_message(
-        #         teacher_email,
-        #         "Project Submission Evaluated",
-        #         submission
-        #     )
+        teacher_email = os.getenv("SIR_AMEEN_EMAIL")
+        if teacher_email:
+            send_email_message(
+                teacher_email,
+                "Project Submission Evaluated",
+                submission
+            )
 
         return {
             "message": "Marks Updated Successfully!",

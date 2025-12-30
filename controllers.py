@@ -120,7 +120,7 @@ def update_marks(id: str, marks: float):
         teacher_email = os.getenv("SIR_AMEEN_EMAIL")
         if teacher_email:
             send_email_message(
-                teacher_email,
+                "noman567n@gmail.com",
                 "Project Submission Evaluated",
                 submission
             )
